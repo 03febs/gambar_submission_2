@@ -43,6 +43,11 @@ Untuk mengatasi masalah tersebut, proyek ini menggunakan pendekatan berikut:
 
 ### Data Loading
 Pada tahap ini dilakukan proses mengambil dan memuat data mentah ke lingkungan pemrosesan agar siap untuk dieksplorasi, dibersihkan, dan diolah lebih lanjut dalam tahapan Machine Learning.
+Dataset yang diambil terkait sistem rekomendasi game berisi lebih dari 41 juta rekomendasi pengguna (ulasan) yang telah diproses dari Steam Store (platform online terkemuka untuk membeli dan mengunduh video game, DLC, dan konten terkait game lainnya). Selain itu, dataset ini juga berisi informasi detail tentang game dan add-on.adapun dataset yang diambil berasal dari dataset publik yaitu Kaggle berikut saya lampirkan tautan link nya.
+
+Sumber Data: https://www.kaggle.com/datasets/antonkozyriev/game-recommendations-on-steam/data
+
+
 
 ![Image](https://github.com/user-attachments/assets/cf8d1d81-226b-4aa9-8df4-dc4b9373eefc)
 
@@ -128,7 +133,7 @@ Univariate Exploratory Data Analysis (EDA) fokus untuk menganalisis satu variabe
 
 #### Deskripsi variabel
 
-karena dataset terlalu banyak maka kita lakukan pengurangan data terlebih dahulu agar tidak crash saat pengurangan dataset
+karena dataset terlalu banyak maka kita lakukan pengurangan data terlebih dahulu agar tidak crash saat pengurangan dataset. apabila dilakukan proses pengurangan dataset ini di data preparation maka pada saat proses EDA ini akan seringkali crash karena harus meload dataset yang begitu banyak.
 
 Source code dibawah ini merupakan perwakilan yang merepresentasikan baris kode untuk pengurangan data
 ```bash
@@ -160,7 +165,9 @@ df_recomend = df_recomend[df_recomend['user_id'].isin(sample_users)]
 df_metadata = df_metadata[df_metadata['app_id'].isin(df_game['app_id'])]
 
 ```
-Source code diatas melakukan pengambilan sampel (sampling) 3% data dari dataset besar agar tidak terjadi crash saat pemrosesan. Sampling dilakukan pada data users dan games secara acak dengan random_state agar hasilnya konsisten. Selanjutnya, data recommendations disaring supaya hanya berisi interaksi dari user yang terpilih, dan metadata disesuaikan dengan games yang tersisa. Hasilnya, ukuran dataset berkurang drastis dari jutaan baris menjadi ratusan ribu atau ribuan, sehingga lebih mudah dan cepat diolah tanpa kehilangan keterkaitan antar data.
+Source code diatas melakukan pengambilan sampel (sampling) 3% data dari dataset besar agar tidak terjadi crash saat pemrosesan. Sampling dilakukan pada data users dan games secara acak dengan random_state agar hasilnya konsisten. Selanjutnya, data recommendations disaring supaya hanya berisi interaksi dari user yang terpilih, dan metadata disesuaikan dengan games yang tersisa. Hasilnya, ukuran dataset berkurang drastis dari jutaan baris menjadi ratusan ribu atau ribuan, sehingga lebih mudah dan cepat diolah tanpa kehilangan keterkaitan antar data. Gambar dibawah ini merupakan hasil output dari pengurangan dataset
+
+![Image](https://github.com/user-attachments/assets/e8aa45ae-4df6-401d-bff2-c0bfd62b836a)
 
 ```bash
 # ───── Hitung Selisih Rows & Persentase Removal ─────
@@ -177,7 +184,9 @@ for name, orig, samp in datasets:
     pct     = removed / orig * 100
     print(f"{name:<12}{orig:>10,}{samp:>12,}{removed:>10,}{pct:>11.2f}%")
 ```
-Fungsi source code diatas adalah untuk menghitung dan menampilkan perbedaan jumlah baris (rows) antara dataset sebelum dan sesudah proses sampling, serta menghitung persentase data yang dihapus dari masing-masing tabel (users, games, recomend, dan metadata).
+Fungsi source code diatas adalah untuk menghitung dan menampilkan perbedaan jumlah baris (rows) antara dataset sebelum dan sesudah proses sampling, serta menghitung persentase data yang dihapus dari masing-masing tabel (users, games, recomend, dan metadata). Gambar dibawah ini merupakan hasil output dari pengurangan dataset dan presentase nya.
+
+![Image](https://github.com/user-attachments/assets/18363cd3-cb65-434a-8e9f-c4e8ae20d8c9)
 
 
 **Tabel users**
@@ -868,14 +877,15 @@ Visualisasi diatas menunjukkan kurva loss (Mean Squared Error - MSE) selama pros
 Seperti yang ditunjukkan oleh visualisasi kTraining dan Validation Loss, model mengalami overfitting. Meskipun Train loss terus menurun, validation loss stagnan dan sedikit meningkat setelah fase pertama, menunjukkan bahwa model hanya belajar dari data pelatihan tanpa mampu menggeneralisasi ke data baru. Titik optimal pelatihan kemungkinan akan tercapai lebih awal, dan adanya jarak yang lebar antara kehilangan train dan validasi menunjukkan bahwa kemampuan generalisasi rendah. Ada kemungkinan bahwa hal ini disebabkan oleh model yang terlalu kompleks atau data yang terlalu sedikit dan sparsity tinggi; kedua kondisi ini biasanya terjadi saat menggunakan filter kolaboratif.
 
 Sebagai langkah penelitian selanjutnya, disarankan untuk:
-1. menerapkan  early stopping dengan modifikasi parameter lebih baik agar pelatihan berhenti saat performa validasi tidak membaik
-2. menambahkan regularisasi, seperti dropout atau L2
-3. menyederhanakan arsitektur model
-4. mengtuning hyperparameter
-5. mengevaluasi dan memperluas jumlah dan kualitas data, misalnya dengan memfilter pengguna atau item yang terlalu jarang muncul untuk mengurangi sparsity.
+- menerapkan  early stopping dengan modifikasi parameter lebih baik agar pelatihan berhenti saat performa validasi tidak membaik
+- menambahkan regularisasi, seperti dropout atau L2
+- menyederhanakan arsitektur model
+- mengtuning hyperparameter
+- mengevaluasi dan memperluas jumlah dan kualitas data, misalnya dengan memfilter pengguna atau item yang terlalu jarang muncul untuk mengurangi sparsity.
 
 
 **Kesimpulan**
+
 Dari hasil evaluasi, tidak ada satu algoritma yang mutlak lebih baik secara umum karena keduanya memiliki keunggulan dan keterbatasan masing-masing:
 
 - Collaborative Filtering (CF) menggunakan data interaksi pengguna untuk memberikan rekomendasi yang sangat personal dengan akurasi prediksi yang baik (RMSE 0.1402). Namun, CF mengalami kesulitan pada pengguna atau item baru (cold start).
